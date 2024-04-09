@@ -8,13 +8,13 @@ Projenin güvenlikle alakalı endişesi olmadığı için .env dosyası .gitigno
 [Website:](https://multi-select-autocomplete-case.vercel.app "Website")
 ***
 Input
-![Input Görünümü]('/public/img1.png')
+![Input Görünümü]('https://multi-select-autocomplete-case.vercel.app/img1.png')
 ***
 Filtreleme
-![Search List]('/public/img2.png')
+![Search List]('https://multi-select-autocomplete-case.vercel.app/img2.png')
 ***
 Multi-select
-![Multi-select]('/public/img3.png')
+![Multi-select]('https://multi-select-autocomplete-case.vercel.app/img3.png')
 
 
 
