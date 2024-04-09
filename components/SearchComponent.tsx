@@ -98,9 +98,9 @@ export default function SearchComponent() {
                     </button>
                 </div>
 
-                {/* Karakter listesi */}
+                {/* Karakter listesi açma ve kapatma işlemi */}
                 {listOpen && (
-                    <div className="flex flex-col gap-2 p-2 border bg-gray-100 border-gray-600 rounded-xl max-h-[600px] overflow-auto">
+                    <div className="flex flex-col gap-2 p-2 border bg-gray-100 border-gray-600 rounded-xl max-h-[600px] overflow-auto scrollbar-thin">
 
                         {/* Api fetch işlemi esnasında kullanıcıya geri bildirim yapmak için yükleme animasyonu eklendi ve loading isimli değişkene bağlandı.
                         Loading true olduğunda div render olacak ve yükleniyor animasyonu çalışacak */}
@@ -116,15 +116,20 @@ export default function SearchComponent() {
                         )}
                         
                         {/* Arama sonuçları burada gösterildi. */}
-                        {filteredCharacters.map((character) => {
+                        {filteredCharacters.map((character, index) => {
 
                             /* Component içerisinde karakter isimlerinin bir kısmı kalın yazdırılacağı için term değişkeni componente gönderildi */
                             return(
-                                <CharacterListItem 
-                                key={`characterListItem${character.id.toString()}`}
-                                character={character}
-                                term={term}
-                                />
+                                <div className="flex flex-col">
+                                    <CharacterListItem 
+                                    key={`characterListItem${character.id.toString()}`}
+                                    character={character}
+                                    term={term}
+                                    />
+                                    {index != filteredCharacters.length - 1 && (
+                                        <div className="h-px bg-gray-600 w-full"/>
+                                    )}
+                                </div>
                             )
                         })}
 
