@@ -75,6 +75,17 @@ export default function SearchComponent() {
         }
     }, [term])
 
+    /* 
+    İnternet hızının yavaş olduğu kullanıcılarda input silinse bile fetch işlemi tamamlandıktan sonra filtered characterlere ekleme yapıp gereksiz
+    listelemenin önüne geçebilmek için bu useEffect eklendi
+    */
+    useEffect(() => {
+        if (term.trim().length == 0) {
+            setListOpen(false)
+            setFilteredCharacters([])
+        }
+    }, [filteredCharacters])
+
     const contextValue: searchComponentContextType = {
         selectedCharacters,
         setSelectedCharacters,
