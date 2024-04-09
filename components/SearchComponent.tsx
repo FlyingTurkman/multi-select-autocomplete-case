@@ -7,7 +7,7 @@ import SelectedCharacter from "@/components/SelectedCharacter"
 import CharacterListItem from "@/components/CharacterListItem"
 import { searchByTerm } from "@/actions/searchByTerm"
 import { AiOutlineLoading3Quarters } from "react-icons/ai"
-import { createContext } from "react"
+import { createContext, KeyboardEvent } from "react"
 
 
 
@@ -17,19 +17,23 @@ export type searchComponentContextType = {
     selectedCharacters: characterType[],
     setSelectedCharacters: Dispatch<SetStateAction<characterType[]>>,
     filteredCharacters: characterType[],
-    setFilteredCharacters: Dispatch<SetStateAction<characterType[]>>
+    setFilteredCharacters: Dispatch<SetStateAction<characterType[]>>,
+    focusedIndex: number,
+    setFocusedIndex: Dispatch<SetStateAction<number>>
 }
 
 
 /* Componentlerde selectedCharacters ve filteredCharacters statelerine erişebilmek için useContext hookunu kullanmayı tercih ettim.
-selectedCharacters, setSelectedCharacters, filteredCharacters, setFilteredCharacters direkt olarak componentlere prop olarak da gönderilebilir ama
+selectedCharacters, setSelectedCharacters, filteredCharacters, setFilteredCharacters, focusedIndex ve setFocusedIndex direkt olarak componentlere prop olarak da gönderilebilir ama
 ilerleyen dönemlerde componentlerde meydana gelen güncellemelerin daha sağlıklı ve hızlı gerçekleşebilmesi için useContext ile yapmayı tercih ettim.
 */
 export const SearchComponentContext = createContext<searchComponentContextType>({
     selectedCharacters: [],
     setSelectedCharacters: () => {},
     filteredCharacters: [],
-    setFilteredCharacters: () => {}
+    setFilteredCharacters: () => {},
+    focusedIndex: -1,
+    setFocusedIndex: () => {}
 })
 
 
@@ -54,6 +58,9 @@ export default function SearchComponent() {
     //Fetch işleminde hata meydana gelmesi ihtimaline karşılık kullanıcıya bir geri bildirim gönderebilmek adına hata mesajını bu state ile kullanıcıya gösteriyorum.
     const [searchError, setSearchError] = useState<string | undefined>(undefined)
 
+    //Ok tuşları ve tab ile navigasyonun yönetilmesi için kullanılıyor
+    const [focusedIndex, setFocusedIndex] = useState<number>(-1)
+
     /* 
     Hem form submit edildiğinde hem de term stateinde değişiklik meydana geldiğinde arama fonksiyonunu tetiklemek için useEffect kullandım.
     */
@@ -72,11 +79,13 @@ export default function SearchComponent() {
         selectedCharacters,
         setSelectedCharacters,
         filteredCharacters,
-        setFilteredCharacters
+        setFilteredCharacters,
+        focusedIndex,
+        setFocusedIndex
     }
     return(
         <SearchComponentContext.Provider value={contextValue}>
-            <form className="flex flex-col gap-2 p-2 mx-auto max-w-[600px]"  onSubmit={((e) => searchByTermFunction(e))}>
+            <form className="flex flex-col gap-2 p-2 mx-auto max-w-[600px]" onSubmit={((e) => searchByTermFunction(e))} onKeyDown={((e) => formNavigation(e))}>
 
                 {/* Input ve unselect kısmı */}
                 <div className="flex flex-row gap-2 p-2 rounded-xl border-gray-600 border shadow-sm shadow-gray-300">
@@ -91,7 +100,7 @@ export default function SearchComponent() {
                                 />
                             )
                         })}
-                        <input placeholder="Type a name" className="flex flex-1 w-full" defaultValue={term} onChange={((e) => setTerm(e.target.value))}/>
+                        <input placeholder="Type a name" className="flex flex-1 w-full" defaultValue={term} onChange={((e) => setTerm(e.target.value))} onFocus={() => setFocusedIndex(-1)}/>
                     </div>
                     <button className="flex ml-auto items-center justify-center" type="button" onClick={() => setListOpen((isOpen) => !isOpen)}>
                         <FaCaretDown className={`${listOpen? 'rotate-180': 'rotate-0'} transition-all`}/>
@@ -118,12 +127,15 @@ export default function SearchComponent() {
                         {/* Arama sonuçları burada gösterildi. */}
                         {filteredCharacters.map((character, index) => {
 
-                            /* Component içerisinde karakter isimlerinin bir kısmı kalın yazdırılacağı için term değişkeni componente gönderildi */
+                            /* Component içerisinde karakter isimlerinin bir kısmı kalın yazdırılacağı için term değişkeni componente gönderildi.
+                            Componentin kapsayıcısı olan butona focus işlemi ve navigasyon işleminin yapılabilmesi için index değeri componente prop olarak gönderildi.
+                            */
                             return(
                                 <div className="flex flex-col" key={`characterListItem${character.id.toString()}`}>
                                     <CharacterListItem 
                                     character={character}
                                     term={term}
+                                    index={index}
                                     />
                                     {index != filteredCharacters.length - 1 && (
                                         <div className="h-px bg-gray-600 w-full"/>
@@ -170,7 +182,36 @@ export default function SearchComponent() {
             setSearchError(response?.message)
         }
 
+        //Focus işlemi resetlendi
+        setFocusedIndex(-1)
+
         //Yükleme tamamlandığı için yükleniyor animasyonu kaldırıldı
         setLoading(false)
+    }
+
+    function formNavigation(e: KeyboardEvent<HTMLFormElement>) {
+
+
+        if (e.key == 'ArrowDown' || e.key == 'Tab') {
+
+            e.preventDefault()
+
+            if (focusedIndex == filteredCharacters.length - 1) {
+                //Listenin loop yapabilmesi için son karakterdeyken ilk karaktere focus işlemi gerçekleştiriyor.
+                setFocusedIndex(0)
+            } else {
+                setFocusedIndex((i) => i + 1)
+            }
+        } else if (e.key == 'ArrowUp') {
+
+            e.preventDefault()
+
+            if (focusedIndex == 0 || focusedIndex == -1) {
+                //Listenin loop yapabilmesi için ilk karakterdeyken son karaktere focus işlemi gerçekleştiriyor.
+                setFocusedIndex(filteredCharacters.length - 1)
+            } else {
+                setFocusedIndex((i) => i - 1)
+            }
+        }
     }
 }

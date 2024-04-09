@@ -3,7 +3,7 @@
 import { characterType } from "@/types"
 import { imageLoader } from "@/utils/imageLoader"
 import Image from "next/image"
-import { useContext } from "react"
+import { useContext, useEffect, useRef } from "react"
 import { SearchComponentContext, searchComponentContextType } from "./SearchComponent"
 import { partialBold } from "@/utils/partialBold"
 
@@ -16,23 +16,35 @@ import { partialBold } from "@/utils/partialBold"
 
 
 
-
 export default function CharacterListItem({
     character,
-    term
+    term,
+    index
 }: {
     character: characterType,
-    term: string
+    term: string,
+    index: number
 }) {
 
+    const buttonRef = useRef<HTMLButtonElement>(null)
     /* Parent component içerisinde açıkladığım useContext hookuna erişim gerçekleştirildi. */
     const {
         selectedCharacters,
-        setSelectedCharacters
+        setSelectedCharacters,
+        focusedIndex
     }: searchComponentContextType = useContext(SearchComponentContext)
 
+    useEffect(() => {
+
+        /* 
+        focusedIndex ve componentin indexi eşit olduğunda buttona focus oluyor. Navigasyon işlemi için eklendi
+        */
+        if (index == focusedIndex && buttonRef && buttonRef.current) {
+            buttonRef.current.focus()
+        }
+    }, [focusedIndex])
     return(
-        <button type='button' className="flex flex-row items-center gap-2 p-2" onClick={toggleCharacter}>
+        <button ref={buttonRef} type='button' className="flex flex-row flex-shrink-0 items-center gap-2 p-2 rounded-lg" onClick={toggleCharacter}>
 
             {/* Tipi checkbox olan input readOnlu olarak kullanıldı.
             Bunun kullanılmasının sebebi ise check işleminin inputun parenti olan buttona tıklandığında gerçekleşmesidir.
