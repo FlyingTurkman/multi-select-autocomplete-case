@@ -120,9 +120,8 @@ export default function SearchComponent() {
 
                             /* Component içerisinde karakter isimlerinin bir kısmı kalın yazdırılacağı için term değişkeni componente gönderildi */
                             return(
-                                <div className="flex flex-col">
+                                <div className="flex flex-col" key={`characterListItem${character.id.toString()}`}>
                                     <CharacterListItem 
-                                    key={`characterListItem${character.id.toString()}`}
                                     character={character}
                                     term={term}
                                     />
