@@ -1,4 +1,8 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
+const nextConfig = {
+    env: {
+        apiPath: process.env.apiPath
+    }
+};
 
 export default nextConfig;
